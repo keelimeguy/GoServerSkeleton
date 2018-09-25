@@ -1,0 +1,37 @@
+{{define "login"}}
+    <form id="login-form" class="p-4" aria-labelledby="dropdown-login-menu" action="/login" method="post">
+        <div class="form-group">
+            <input type="text" class="form-control" name="password" id="login-dropdown-form-password" placeholder="Password" autocomplete="current-password">
+        </div>
+        <button type="submit" class="btn btn-primary">Sign in</button>
+        <span class="text-danger" id="login-info"></span>
+    </form>
+
+    <script class="script-onload">
+        {
+            function loginListener(e) {
+                e.preventDefault();
+                var x = new XMLHttpRequest();
+                x.onload = function () {
+                    if (x.status == 200) {
+                        window.location.href = "/";
+                    } else {
+                        console.log(x.response)
+                        document.getElementById("login-info").innerHTML = "Login failed.";
+                    }
+                };
+                x.open("POST", "/login");
+                var fd = new FormData(document.getElementById("login-form"));
+                var object = {};
+                fd.forEach(function(value, key){
+                    object[key] = value;
+                });
+                var json = JSON.stringify(object);
+                x.setRequestHeader("Content-Type", "application/json");
+                x.send(json);
+            }
+
+            document.getElementById("login-form").addEventListener("submit", loginListener);
+        }
+    </script>
+{{end}}

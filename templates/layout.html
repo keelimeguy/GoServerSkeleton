@@ -1,0 +1,39 @@
+{{define "header"}}
+    <!DOCTYPE html>
+    <html lang="en-us">
+        <head>
+            <meta charset="UTF-8"/>
+            <title>{{if .Title}}{{.Title}}{{else}}My Site{{end}}</title>
+            <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"/>
+
+            <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css" integrity="sha384-WskhaSGFgHYWDcbwN70/dfYBj47jz9qbsMId/iRN3ewGhXQFZCSftd1LZCfmhktB" crossorigin="anonymous">
+            <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
+            <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js" integrity="sha384-smHYKdLADwkXOn1EmN1qk/HfnUcbVRZyYmZ4qpPea6sjB/pTJ0euyQp0Mk8ck+5T" crossorigin="anonymous"></script>
+
+            <!-- Open Iconic — www.useiconic.com/open -->
+            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/open-iconic/1.1.1/font/css/open-iconic-bootstrap.min.css" integrity="sha256-BJ/G+e+y7bQdrYkS2RBTyNfBHpA9IuGaPmf9htub5MQ=" crossorigin="anonymous" />
+
+            <!-- <link rel="stylesheet" type="text/css" href="{{.Site}}/public/css/print.css" media="print"/> -->
+            <link rel="stylesheet" type="text/css" href="{{.Site}}/public/css/style.css"/>
+            <script src="{{.Site}}/public/js/scripts.js"></script>
+
+            <link href="{{.Site}}/public/images/favicon.ico" rel="icon" type="image/x-icon"/>
+        </head>
+        <body>
+            <div class="wrapper">
+{{end}}
+
+{{define "footer"}}
+            </div>
+            <script>
+                scriptOnloadRemover();
+            </script>
+            <footer>
+                <p style="margin: 0px 0px 4px 4px; pointer-events: none;">
+                    Version: {{.Version}}
+                </p>
+            </footer>
+        </body>
+    </html>
+{{end}}

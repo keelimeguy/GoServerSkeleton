@@ -1,0 +1,12 @@
+body {
+    overflow: hidden;
+}
+
+footer {
+    position: fixed;
+    bottom: 0;
+}
+
+#login-form{
+    width: 300px;
+}
