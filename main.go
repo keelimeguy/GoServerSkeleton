@@ -3,6 +3,7 @@ package main
 import (
     "net/http"
     "regexp"
+    "time"
     "os"
 
     "github.com/gorilla/context"
@@ -35,13 +36,58 @@ func main() {
     log.Init(log_dir, "myserver_log", 524288, true)
     server.Init(key_JWT_SIGNING, key_COOKIE_SIGNING, template_dir, git_VERSION)
 
-    http.Handle("/public/", http.StripPrefix("/public/", http.FileServer(http.Dir("./public"))))
+    // TODO: remove NoCache for static files (exists now since static files constantly changing)
+    http.Handle("/public/", NoCache(http.StripPrefix("/public/", http.FileServer(http.Dir("./public")))))
 
     http.HandleFunc("/", server.Validate(server.HomeHandler))
     http.HandleFunc("/login", server.Validate(server.LoginHandler))
+    http.HandleFunc("/join", server.Validate(server.JoinHandler))
 
     log.Enterf("Starting test server at :%s", port)
     if err := http.ListenAndServe(":"+port, context.ClearHandler(http.DefaultServeMux)); err != nil {
         panic(err)
     }
 }
+
+/******************************************************/
+// For debugging, stop cacheing of static files:
+// https://stackoverflow.com/questions/33880343/go-webserver-dont-cache-files-using-timestamp
+
+var epoch = time.Unix(0, 0).Format(time.RFC1123)
+
+var no_cache_headers = map[string]string{
+    "Expires":         epoch,
+    "Cache-Control":   "no-cache, private, max-age=0",
+    "Pragma":          "no-cache",
+    "X-Accel-Expires": "0",
+}
+
+var etag_headers = []string{
+    "ETag",
+    "If-Modified-Since",
+    "If-Match",
+    "If-None-Match",
+    "If-Range",
+    "If-Unmodified-Since",
+}
+
+func NoCache(h http.Handler) http.Handler {
+    fn := func(w http.ResponseWriter, r *http.Request) {
+        // Delete any ETag headers that may have been set
+        for _, v := range etag_headers {
+            if r.Header.Get(v) != "" {
+                r.Header.Del(v)
+            }
+        }
+
+        // Set our NoCache headers
+        for k, v := range no_cache_headers {
+            w.Header().Set(k, v)
+        }
+
+        h.ServeHTTP(w, r)
+    }
+
+    return http.HandlerFunc(fn)
+}
+/******************************************************/

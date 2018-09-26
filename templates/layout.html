@@ -21,7 +21,57 @@
             <link href="{{.Site}}/public/images/favicon.ico" rel="icon" type="image/x-icon"/>
         </head>
         <body>
-            <div class="wrapper">
+            {{if .Navbar}}
+                {{template "navbar" .}}
+            {{end}}
+            <div class="wrapper top-padding">
+{{end}}
+
+{{define "navbar"}}
+            <nav id="navbar-top" class="navbar fixed-top navbar-expand-lg navbar-light bg-light">
+                <a class="navbar-brand" href="{{.Site}}">{{.Text}}</a>
+                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar-nav" aria-controls="navbar-nav" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <div class="collapse navbar-collapse" id="navbar-nav">
+                    <ul class="navbar-nav">
+                        {{range .LeftItems}}
+                        {{$len := len .DropItems}}
+                        <li class="nav-item{{if .Active}} active{{end}}{{if .Dropdown}} dropdown{{end}}">
+                            <a href="{{.Link}}" class="nav-link{{if .Dropdown}} dropdown-toggle{{if eq $len 0}} d-none{{end}}" id="{{.Id}}" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false{{end}}">{{.Text}}{{if .Active}} <span class="sr-only">(current)</span>{{end}}</a>
+                            {{if .Dropdown}}
+                            <div class="dropdown-menu scrollable-menu{{if eq $len 0}} d-none{{end}}" aria-labelledby="{{.Id}}">
+                                {{range .DropItems}}
+                                <a class="dropdown-item" href="{{.Link}}">{{.Text}}</a>
+                                {{end}}
+                            </div>
+                            {{end}}
+                        </li>
+                        {{end}}
+                    </ul>
+                    <ul class="navbar-nav ml-auto">
+                        {{range .RightItems}}
+                        {{$len := len .DropItems}}
+                        <li class="nav-item{{if .Active}} active{{end}}{{if .Dropdown}} dropdown{{end}}">
+                            <a href="{{.Link}}" class="nav-link{{if .Dropdown}} dropdown-toggle{{if eq $len 0}} d-none{{end}}" id="{{.Id}}" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false{{end}}">{{.Text}}{{if .Active}} <span class="sr-only">(current)</span>{{end}}</a>
+                            {{if .Dropdown}}
+                            <div class="dropdown-menu scrollable-menu{{if eq $len 0}} d-none{{end}}" aria-labelledby="{{.Id}}">
+                                {{range .DropItems}}
+                                <a class="dropdown-item" href="{{.Link}}">{{.Text}}</a>
+                                {{end}}
+                            </div>
+                            {{end}}
+                        </li>
+                        {{end}}
+                    </ul>
+                    {{if .LoggedIn}}
+                        {{template "logout" .}}
+                    {{else}}
+                        {{template "login" .}}
+                    {{end}}
+                </div>
+            </nav>
 {{end}}
 
 {{define "footer"}}

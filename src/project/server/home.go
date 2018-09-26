@@ -2,7 +2,6 @@ package server
 
 import (
     "encoding/json"
-    "html/template"
     "net/http"
 
     "github.com/gorilla/context"
@@ -28,9 +27,9 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
 
     // GET the main page
     if r.Method == http.MethodGet {
-        log.Check(tmpl.ExecuteTemplate(w, "header", struct{Title string;Site template.URL}{"Sample Page", template.URL("http:/"+"/"+r.Host)}))
+        log.Check(tmpl.ExecuteTemplate(w, "header", ImageNav(claims.UID, "http:/"+"/"+r.Host)))
         if claims.UID == "" {
-            log.Check(tmpl.ExecuteTemplate(w, "login", nil))
+            log.Check(tmpl.ExecuteTemplate(w, "join_us", nil))
         } else {
             log.Check(tmpl.ExecuteTemplate(w, "welcome", nil))
         }

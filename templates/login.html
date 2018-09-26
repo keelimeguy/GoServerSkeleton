@@ -1,37 +1,121 @@
-{{define "login"}}
-    <form id="login-form" class="p-4" aria-labelledby="dropdown-login-menu" action="/login" method="post">
-        <div class="form-group">
-            <input type="text" class="form-control" name="password" id="login-dropdown-form-password" placeholder="Password" autocomplete="current-password">
-        </div>
-        <button type="submit" class="btn btn-primary">Sign in</button>
-        <span class="text-danger" id="login-info"></span>
+{{define "logout"}}
+    <form id="logout-form" class="form-inline my-2 my-lg-0">
+        <button class="btn btn-outline-danger my-2 my-sm-0" type="submit">Logout</button>
     </form>
+    <script class="script-onload">
+        {
+            function logoutListener(e) {
+                e.preventDefault();
+                eraseCookie("authorization");
+                location.reload();
+            }
 
+            document.getElementById("logout-form").addEventListener("submit", logoutListener);
+        }
+    </script>
+{{end}}
+
+{{define "login"}}
+    <div class="my-2 my-lg-0 dropdown">
+        <div class="btn-group" role="group" aria-label="Login | Register">
+            <div class="btn-group" role="group" aria-label="Login">
+                <button class="btn btn-primary my-2 my-sm-0" title="Login" type="button" id="dropdown-login-menu" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Login</button>
+                <div class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdown-login-menu">
+                    <form id="login-form" class="p-4" aria-labelledby="dropdown-login-menu" action="/login" method="post">
+                        <div class="form-group">
+                            <label for="login-dropdown-form-user">User</label>
+                            <input type="text" class="form-control" name="user" id="login-dropdown-form-user" placeholder="Username | Email" autocomplete="email">
+                        </div>
+                        <div class="form-group">
+                            <label for="login-dropdown-form-password">Password</label>
+                            <input type="password" class="form-control" name="password" id="login-dropdown-form-password" placeholder="Password" autocomplete="current-password">
+                        </div>
+                        <div class="form-check">
+                            <input type="checkbox" class="form-check-input" id="dropdown-check-login">
+                            <label class="form-check-label" for="dropdow-check-login">
+                                Remember me
+                            </label>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Sign in</button>
+                        <span class="text-danger" id="signin-info"></span>
+                    </form>
+                </div>
+            </div>
+            <div class="btn-group" role="group" aria-label="Register">
+                                <button class="btn btn-primary my-2 my-sm-0" title="Register" type="button" id="dropdown-signup-menu" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Register</button>
+                <div class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdown-signup-menu">
+                    <form id="signup-form" class="p-4" aria-labelledby="dropdown-signup-menu" action="/join" method="post">
+                        <div class="form-group">
+                            <label for="signup-dropdown-form-username">Username*</label>
+                            <input type="text" class="form-control" name="username" id="signup-dropdown-form-username" placeholder="Username" autocomplete="username">
+                        </div>
+                        <div class="form-group">
+                            <label for="signup-dropdown-form-firstname">First Name</label>
+                            <input type="text" class="form-control" name="firstname" id="signup-dropdown-form-firstname" placeholder="First Name" autocomplete="firstname">
+                        </div>
+                        <div class="form-group">
+                            <label for="signup-dropdown-form-lastname">Last Name</label>
+                            <input type="text" class="form-control" name="lastname" id="signup-dropdown-form-lastname" placeholder="Last Name" autocomplete="lastname">
+                        </div>
+                        <div class="form-group">
+                            <label for="signup-dropdown-form-email">Email Address*</label>
+                            <input type="email" class="form-control" name="email" id="signup-dropdown-form-email" placeholder="email@example.com" autocomplete="email">
+                        </div>
+                        <div class="form-group">
+                            <label for="signup-dropdown-form-password">Password*</label>
+                            <input type="password" class="form-control" name="password" id="signup-dropdown-form-password" placeholder="Password" autocomplete="current-password">
+                        </div>
+                        <button type="submit" class="btn btn-primary">Sign up</button>
+                        <span class="text-danger" id="signup-info"></span>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
     <script class="script-onload">
         {
             function loginListener(e) {
                 e.preventDefault();
-                var x = new XMLHttpRequest();
-                x.onload = function () {
-                    if (x.status == 200) {
-                        window.location.href = "/";
-                    } else {
-                        console.log(x.response)
-                        document.getElementById("login-info").innerHTML = "Login failed.";
-                    }
-                };
-                x.open("POST", "/login");
                 var fd = new FormData(document.getElementById("login-form"));
                 var object = {};
                 fd.forEach(function(value, key){
                     object[key] = value;
                 });
                 var json = JSON.stringify(object);
-                x.setRequestHeader("Content-Type", "application/json");
-                x.send(json);
+                xmlPostRequest(json, {json:true}, '/login', function(success, response) {
+                        if (success) {
+                            location.reload();
+                        } else {
+                            document.getElementById("signin-info").innerHTML = "Sign-in failed"
+                        }
+                    }
+                );
             }
 
             document.getElementById("login-form").addEventListener("submit", loginListener);
+        }
+    </script>
+    <script class="script-onload">
+        {
+            function signupListener(e) {
+                e.preventDefault();
+                var fd = new FormData(document.getElementById("signup-form"));
+                var object = {};
+                fd.forEach(function(value, key){
+                    object[key] = value;
+                });
+                var json = JSON.stringify(object);
+                xmlPostRequest(json, {json:true}, '/join', function(success, response) {
+                        if (success) {
+                            location.reload();
+                        } else {
+                            document.getElementById("signup-info").innerHTML = "Sign-up failed"
+                        }
+                    }
+                );
+            }
+
+            document.getElementById("signup-form").addEventListener("submit", signupListener);
         }
     </script>
 {{end}}

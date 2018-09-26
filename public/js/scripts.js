@@ -43,3 +43,22 @@ function scriptOnloadRemover() {
         scripts[0].parentNode.removeChild(scripts[0])
     }
 }
+
+function xmlPostRequest(packet, params, target, onload) {
+    var xml = new XMLHttpRequest();
+    xml.onload = function () {
+        if (xml.status == 200) {
+            onload(true, xml.response)
+        } else {
+            console.log(xml.response);
+            onload(false, xml.response)
+        }
+    };
+    xml.open("POST", target);
+    if (params.json) {
+        xml.setRequestHeader("Content-Type", "application/json");
+    } else if (params.responseType != null) {
+        xml.responseType = params.responseType;
+    }
+    xml.send(packet);
+}

@@ -54,3 +54,27 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
         return
     }
 }
+
+func JoinHandler(w http.ResponseWriter, r *http.Request) {
+    var claims, ok = context.Get(r, "claims").(JWTClaims)
+    if !ok {
+        log.Errorf("Could not read claims.")
+        http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+        return
+    }
+
+    if claims.UID != "" {
+        log.Errorf("Bad request.")
+        http.Error(w, "Bad Request", http.StatusBadRequest)
+        return
+    }
+
+    var data map[string]interface{}
+    if err := json.NewDecoder(r.Body).Decode(&data); log.Check(err) {
+        http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+        return
+    }
+
+    http.Error(w, "Service Unavailable", http.StatusServiceUnavailable)
+    return
+}

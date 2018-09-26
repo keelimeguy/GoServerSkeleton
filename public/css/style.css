@@ -10,3 +10,7 @@ footer {
 #login-form{
     width: 300px;
 }
+
+.top-padding {
+    padding-top: 70px;
+}
