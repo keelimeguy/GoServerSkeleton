@@ -1,5 +1,4 @@
 body {
-    overflow: hidden;
 }
 
 footer {
@@ -7,10 +6,18 @@ footer {
     bottom: 0;
 }
 
-#login-form{
+#login-form {
+    width: 300px;
+}
+
+#signup-form {
     width: 300px;
 }
 
 .top-padding {
     padding-top: 70px;
+}
+
+.account-card {
+    display: none;
 }

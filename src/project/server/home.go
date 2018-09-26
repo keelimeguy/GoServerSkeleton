@@ -34,6 +34,7 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
             log.Check(tmpl.ExecuteTemplate(w, "welcome", nil))
         }
         log.Check(tmpl.ExecuteTemplate(w, "footer", struct{Version string}{version}))
+        return
 
     } else if r.Method == http.MethodPut {
         var data map[string]interface{}
@@ -58,7 +59,8 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
         }
 
     } else {
-        log.Warningf("Unexpected request.")
-        http.Redirect(w, r, "/", 303)
+        log.Warningf("Method not allowed.")
+        http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
+        return
     }
 }

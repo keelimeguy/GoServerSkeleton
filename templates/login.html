@@ -7,7 +7,7 @@
             function logoutListener(e) {
                 e.preventDefault();
                 eraseCookie("authorization");
-                location.reload();
+                location.href = '/';
             }
 
             document.getElementById("logout-form").addEventListener("submit", logoutListener);
