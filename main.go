@@ -43,7 +43,7 @@ func main() {
     http.HandleFunc("/login", server.Validate(server.LoginHandler))
     http.HandleFunc("/join", server.Validate(server.JoinHandler))
 
-    log.Enterf("Starting test server at :%s", port)
+    log.Enterf("Starting test server [%s] at :%s", git_VERSION, port)
     if err := http.ListenAndServe(":"+port, context.ClearHandler(http.DefaultServeMux)); err != nil {
         panic(err)
     }
