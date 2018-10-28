@@ -8,7 +8,7 @@ import (
 
     log "project/logging"
 )
-
+// just don't care about go generated HTML yet.
 func HomeHandler(w http.ResponseWriter, r *http.Request) {
     // Handle unknown path with 404
     if r.URL.Path != "/" {

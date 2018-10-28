@@ -7,7 +7,7 @@ import (
 
     log "project/logging"
 )
-
+// more templates NOPE
 func AccountHandler(w http.ResponseWriter, r *http.Request) {
     if r.Method == http.MethodGet {
         var claims, ok = context.Get(r, "claims").(JWTClaims)

@@ -1,6 +1,8 @@
 # Go Server Skeleton
 A skeleton for making website servers in Go
 
+My goal is to modify this so that it's a little be more semantically organized, and there is a clear delineation between dependencies/module type codeblocks and their examples
+
 ## Usage
 Build and run server with:  
     `make && ./run`  

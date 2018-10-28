@@ -12,17 +12,18 @@ import (
     log "project/logging"
 )
 
-var (
+var ( // should these be checked?
     git_VERSION string
     key_COOKIE_SIGNING string
     key_JWT_SIGNING string
 )
-
+// TODO: server transitions + loadbalancing. Instances should talk to themselves and replace each other gracefully
+// TODO: https
 func main() {
 
     if len(os.Args) != 4 {
         panic("Usage: "+os.Args[0]+" <port, e.g 80> <template_regex> <log_dir>")
-    }
+    } // yah no
     port := os.Args[1]
     template_dir := os.Args[2]
     log_dir := os.Args[3]
@@ -33,13 +34,14 @@ func main() {
         panic("Invalid port number: "+port)
     }
 
+		// probably look into the log manging systems on the platform
     log.Init(log_dir, "myserver_log", 524288, true)
     server.Init(key_JWT_SIGNING, key_COOKIE_SIGNING, template_dir, git_VERSION)
 
     // TODO: remove NoCache for static files (exists now since static files constantly changing)
     http.Handle("/public/", NoCache(http.StripPrefix("/public/", http.FileServer(http.Dir("./public")))))
 
-    http.HandleFunc("/", server.Validate(server.HomeHandler))
+    http.HandleFunc("/", server.Validate(server.HomeHandler)) // server was probably a bad module choice name since http already implements Server. it seems like we're not with golang's notation either, which makes it hard to read.
     http.HandleFunc("/login", server.Validate(server.LoginHandler))
     http.HandleFunc("/join", server.Validate(server.JoinHandler))
     http.HandleFunc("/account", server.Validate(server.AccountHandler))

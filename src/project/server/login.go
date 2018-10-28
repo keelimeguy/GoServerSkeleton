@@ -9,7 +9,10 @@ import (
 
     log "project/logging"
 )
-
+// imagine a function that takes a password checker and returns a login handled
+// this is also pretty much related to JWT tho.. I guess it has to be
+// I suppose abstracting this so it takes a "password checker"
+// naw I guess then what do you do right? at the end you need something to definitely make state;
 func LoginHandler(w http.ResponseWriter, r *http.Request) {
     if r.Method == http.MethodPost {
         var claims, ok = context.Get(r, "claims").(JWTClaims)
@@ -81,7 +84,7 @@ func JoinHandler(w http.ResponseWriter, r *http.Request) {
             http.Error(w, "Internal Server Error", http.StatusInternalServerError)
             return
         }
-
+				// okayyyyyyy just fuciing DIE
         http.Error(w, "Service Unavailable", http.StatusServiceUnavailable)
         return
     } else {

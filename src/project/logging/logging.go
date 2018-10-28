@@ -13,7 +13,7 @@ var (
     file_PREFIX string
     max_LINES int
     use_COLOR bool
-    output_HANDLE io.Writer
+    output_HANDLE io.Writer // this doesn't seem to be used?
     log_FLAGS = log.Ldate|log.Ltime|log.Llongfile|log.LUTC
 
     lines int
@@ -33,8 +33,8 @@ func Init(log_dir string, file_prefix string, max_lines int, use_color bool) {
     use_COLOR = use_color
 
     info_logger = log.New(nil, "[INFO]: ", log_FLAGS)
-    if use_COLOR {
-        enter_logger = log.New(nil, "\033[32m[ENTER]: ", log_FLAGS)
+    if use_COLOR { // hehe i hate this but its the best way
+        enter_logger = log.New(nil, "\033[32m[ENTER]: ", log_FLAGS) // why nil?
         warning_logger = log.New(nil, "\033[33m[WARNING]: ", log_FLAGS)
         error_logger = log.New(nil, "\033[31m[ERROR]: ", log_FLAGS)
     } else {
@@ -43,14 +43,14 @@ func Init(log_dir string, file_prefix string, max_lines int, use_color bool) {
         error_logger = log.New(nil, "[ERROR]: ", log_FLAGS)
     }
 
-    cur_file = ""
+    cur_file = "" // so we always intend to have a file, from what I can tell
     if max_LINES > 0 {
         lines = max_LINES
-        newLine()
+        newLine() // forward declerations are great...
     }
 }
 
-func newLine() {
+func newLine() { // when I think of new line, I think of \n. Maybe \033[0m. This is also a ringbuffer operation, and file manipulation function.
     lines++
     if lines >= max_LINES {
         lines = 0
@@ -86,7 +86,7 @@ func print_helper(logger *log.Logger, msg string) {
         } else {
             defer f.Close()
 
-            logger.SetOutput(f)
+            logger.SetOutput(f) // one letter variable names are...
             logger.Output(3, msg)
 
             newLine()
@@ -97,6 +97,8 @@ func print_helper(logger *log.Logger, msg string) {
     logger.Output(3, msg)
 }
 
+// so these are error levels but...
+
 func Printf(format string, v ...interface{}) {
     msg := fmt.Sprintf(format, v ...)
     print_helper(info_logger, msg)
@@ -105,7 +107,7 @@ func Printf(format string, v ...interface{}) {
 func Enterf(format string, v ...interface{}) {
     msg := fmt.Sprintf(format, v ...)
     if use_COLOR {
-        msg += "\033[0m"
+        msg += "\033[0m" // yas
     }
 
     print_helper(enter_logger, msg)
@@ -129,7 +131,7 @@ func Errorf(format string, v ...interface{}) {
     print_helper(error_logger, msg)
 }
 
-func Check(err error) (b bool) {
+func Check(err error) (b bool) { // is b by default false? what is this?
     if err != nil {
         msg := err.Error()
         if use_COLOR {
