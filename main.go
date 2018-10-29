@@ -91,6 +91,6 @@ func NoCache(h http.Handler) http.Handler {
         h.ServeHTTP(w, r)
     }
 
-    return http.HandlerFunc(fn)
+    return http.HandlerFunc(fn) // it looks like a function call, but its a type, and i hate it
 }
 /******************************************************/

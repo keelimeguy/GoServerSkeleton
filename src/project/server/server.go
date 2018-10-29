@@ -42,7 +42,7 @@ func Init(_jwt_key string, _cookie_key string, template_dir string, _version str
 
 type JWTClaims struct { // how JWT is implemented probably very specific so maybe uh, maybe this should be an interface? with defaults?
     UID string `json:"uid"`
-    Exp int64 `json:"exp"`
+    Exp int64 `json:"exp"` // default claims is best, just a map yes
 }
 
 func (this JWTClaims) Valid() error {
@@ -62,7 +62,7 @@ func UpdateJWT(claims JWTClaims, w http.ResponseWriter, r *http.Request) (string
 }
 
 // what a way to use interfaces 
-func Validate(next http.HandlerFunc) http.HandlerFunc {
+func Validate(next http.HandlerFunc) http.HandlerFunc { // I'm pretty sure this is what valid was supposed to do
     return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
         defer func() {
             if r := recover(); r != nil {
@@ -82,7 +82,8 @@ func Validate(next http.HandlerFunc) http.HandlerFunc {
                 return []byte(jwt_key), nil
             })
             var ok bool
-            if claims, ok = token.Claims.(*JWTClaims); ok && token.Valid {
+						// okay so, token.Valid does nothing...,, yet we call it, and then do all the things it was supposed to do inside of an if block, but it was supposed to do it during "ParseWithClaims"
+            if claims, ok = token.Claims.(*JWTClaims); ok && token.Valid { 
                 if session.Values["jwt"] != nil {
                     if claims.Exp < now.Unix() {
                         log.Printf("Expired jwt. Forming new token.")

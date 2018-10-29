@@ -18,3 +18,15 @@ If ever pushing with new tags, remember to:
 
 To pull any new tags to local, use:  
     `git pull <remote>`
+
+# Todo:
+
+--- fix skeleton:  
+Get rid of NoCache  
+Get TLS in there  
+organization/libraries  
+- logging
+- building endpoints
+- storing/retreiving/validating JWT
+- operations (in JWT), operations (in postgresql) - really you just need a way to store a machine, and its state variables to disk or elsewhere
+-- now we can develop this along back with the original readme
