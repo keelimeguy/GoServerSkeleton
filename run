@@ -1,3 +1,0 @@
-#!/bin/bash
-# rofl small ass file
-./myserver 8080 "templates/*" logs/

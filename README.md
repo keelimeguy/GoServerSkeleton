@@ -21,12 +21,18 @@ To pull any new tags to local, use:
 
 # Todo:
 
+I basically ignored logging cause it's small and contained. Things aren't really built on it.
 --- fix skeleton:  
-Get rid of NoCache  
-Get TLS in there  
-organization/libraries  
-- logging
-- building endpoints
-- storing/retreiving/validating JWT
-- operations (in JWT), operations (in postgresql) - really you just need a way to store a machine, and its state variables to disk or elsewhere
--- now we can develop this along back with the original readme
+
+- finish fleshing out tokens
+		-- get it implemented (30 minutes)
+- Get TLS in there  (30 minutes)
+- rename packages (45 minutes)
+- test it with curl and not https (30 min)
+- did i miss something from keelins repo (30 min)
+- look @ templates, whatever (45 minutes)
+- document (30 min)
+- pull request (20 minutes) // aj is done
+- is error processing really sufficient? (we're done, keelin can take a look at this if he cares, integrate it with logging better)
+- prevent collisions (key names, JWT, cookies, etc)
+- whats the deal with the ClaimMaps and it's relationship with json

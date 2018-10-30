@@ -1,67 +1,144 @@
+
+
+// Author's notes:
+// Gorilla's session half-implements RFC7519 (JWT), 
+// ... signing and encryption, not validation.
+// So no point in doing signing twice. We'll use setcookie + JWT
+// RFC7519 wants us to use the Authorization header and... IDGAF, doesn't seem great.
+// Only good for APIs
+
+
+// In main or handler page: set authContext.
+// ***a context(s) can implement ServeHTTP directly, and each Handler defines its credentials
+
+// ***a type that takes a context(s) (via pointer/structure/array) 
+// and implements your ServeHTTP function and therefor reuse context.
+
+// ***a funciton that takes a context and returns a function with/ ServerHTTP signature.
+// (same as above, different style)
+
+// I mean, either we use what they gave us and do our best
+
+// some jtw notes- claims is a map[string].(JSON) (i don't want to use json)
+// It's value is whatever we're using. Needs to make sense tho.
+
+// We have exp - expiresat - Int64
+//				 iat - issuedAt - Int64 (Don't use it before it's valid :-p)
+//				 nbf - verifynot - Int64 (Don't verify it?)
+// being the most common.
+// You might give someone a "session id" <-- an associate that with a security level
+// Or track a state machine inside their cookie instead of on server
+// Or give explicit access to a certain resource, through permission or lookup key
+// I don't care what claims you add.
+// This package was essentially conceived and architecuted by Keelin "kbw@autopogo.com" and then implemented by Andrew Pikul "ajp@autopogo.com" in a stunning reversal.
+
 package server
 
 import (
-    "html/template"
     "net/http"
-    "reflect"
     "time"
 
-    "github.com/gorilla/context"
-    "github.com/gorilla/sessions"
     "gopkg.in/dgrijalva/jwt-go.v3"
-
     log "project/logging"
 )
-// so after reading this, I don't know what server is. Is it a reimplementation of httpserver? Actually, so it's something that takes a handler and binds it tightly with hard-coded JWT operations and expectations? i feel like we're not fully utilizing the libraries we've adopted, nor are we fully shimming them. so it's like, we're dependent but hateful of them.
-var (
-    version string
+
+
+type authContext struct (
     jwt_key string
-    store sessions.Store
-    tmpl *template.Template
-    entry_KEY string
+		cookie_name string
+		cookie_persistent bool // close on window (UX hint) 
+		cookie_https bool // cookie only over https
+		cookie_server_only bool // cookie not accessible to client (prevents XSS in modernt browsers)
+		mandatoryTokenRefresh bool // do we refresh the token/cookie if it's below a certain time
+		mandatoryTokenRefreshThereshold float32  // whats that time
+		lifeTime int64 // seconds jwt+cookie have alive (if cookie persistent)
+		// adapter for HTTPServe
+		// adapter for HandlerFunc Factory (not a member)
 )
 
-func Init(_jwt_key string, _cookie_key string, template_dir string, _version string) {
-    store = sessions.NewCookieStore([]byte(_cookie_key))
-    jwt_key = _jwt_key
-    version = _version
-    entry_KEY = "password"
-
-    tmpl = template.Must(template.New("main").Funcs(template.FuncMap{
-            "len": func(l interface{}) int {
-                v := reflect.ValueOf(l)
-                switch v.Kind() {
-                    case reflect.Array, reflect.Slice, reflect.Map:
-                        return v.Len()
-                    default:
-                        return 0
-                }
-            },
-        }).ParseGlob(template_dir))
+// read claims. no cookie, return. claims invalid, return. if claims valid, and exp threshold, set cookie just in case.
+func (aC *authContext) ReadJWT(w ResponseWriter, r *http.Request) (claims jwt.Claims, err error) {
+	if cookie, err := r.Request.Cookie(aC.cookie_name); err != nil {
+		if (err == ErrNoCookie) {
+			return nil, ErrNoCookie
+		}
+		log.Errorf("Weird error trying to find cookie");
+		return
+	}
+	t, err := jwt.Parse(cookie.Value, func(token *jwt.Token) (interface{}, error) {
+		return [](aC.jwt_key), nil
+	})
+	if err = t.Valid; err != nil {
+		claims = t.Claims
+		if val, ok := claims["exp"]; ok && aC.mandatoryTokenRefresh {
+			//TODO if exp < mandatoryTokenRefreshThreshold time
+			aC.setClaims(w, r, claims)
+		} else {
+			// 100 reasons why it might not exist, and therefore not our problem
+		}
+	} else {
+		claims = nil
+	}
 }
 
-type JWTClaims struct { // how JWT is implemented probably very specific so maybe uh, maybe this should be an interface? with defaults?
-    UID string `json:"uid"`
-    Exp int64 `json:"exp"` // default claims is best, just a map yes
+// if no passed cookie, try to pull it, or else create it, ultimately update it, encode it, and set it, using the claims you pass. It will update claims. 
+func (aC *authContext) setClaims(w ResponseWriter, r *http.Request, claims jwt.Claims){
+	if (cookie == nil) {
+		if (cookie, err := r.Cookie(aC.cookie_name)); err != nil {
+			if (err != ErrNoCookie) {
+					log.Errorf("Error having to do with cookie retrieval"); // log flooding?
+				else {
+					aC.setCookieDefaults(cookie, &claims);
+				}
+			}
+		}
+	} else {
+		aC.updateExpiries(cookie, claims); //i'd want it to be a pointer but it's a reference type
+	}
+	token := jwt.NewWithClaims(jwt.SigningMethodsHS256, claims)
+	ss, err := token.SignedString(aC.jwt_key); err != nil {
+		log.Errorf("Couldn't unsign the encrypted string");
+	}
+	cookie.Value = ss;
+	SetCookie(w, cookie)
 }
 
-func (this JWTClaims) Valid() error {
-    return nil // TODO
+// create a cookie and update its stuff
+func (aC *authContext) setCookieDefaults(cookie *http.Cookie, claims jwt.Claims) {
+	if (cookie == nil) {
+		cookie = new(http.Cookie);
+	}
+	aC.updateExpiries(cookie, claims)
+	cookie.HttpOnly = cookie_server_only
+	cookie.Secure = cookie_https
 }
 
-func UpdateJWT(claims JWTClaims, w http.ResponseWriter, r *http.Request) (string, error) {
-    session, _ := store.Get(r, "authorization") // grabbing something from the header obviously?
-    token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-    token_str, err := token.SignedString([]byte(jwt_key))
-    if err != nil {
-        return "", err
-    }
-    session.Values["jwt"] = token_str
-    session.Save(r, w) // okay so you're writing the session structure to the r/w... not writing the r
-    return token_str, nil
+// add the correct expiry to the cookie + jwt
+func (aC *authContext) updateExpiries(cookie *http.Cookie, claims jwt.Claims) {
+	if ( (aC.cookie_persistent)) ) {
+		cookie.Expires = time.Now().Add(lifeTime)
+	} else {
+		cookie.MaxAge = time.Time(0)
+	}
+	claims["exp"] = time.Now().Unix()
 }
 
-// what a way to use interfaces 
+// delete the cookie
+func (aC *authContext) DeleteCookie(w ResponseWriter) (err error) {
+	http.SetCookie(w, &http.Cookie{Name: aC.cookie_name, MaxAge: -1}
+	// I left out things not set as optional but...
+	// TODO return error
+}
+
+// if you're going to refresh the cookie, place the claims you got here
+func (ac *authContext) newClaims(seconds int) (claims Claims, err error) {
+	//create basic claims, i guess. not important.
+}
+
+
+
+
+
 func Validate(next http.HandlerFunc) http.HandlerFunc { // I'm pretty sure this is what valid was supposed to do
     return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
         defer func() {
@@ -71,51 +148,23 @@ func Validate(next http.HandlerFunc) http.HandlerFunc { // I'm pretty sure this 
         }()
 
         log.Enterf("%v %s", r.Method, r.URL.EscapedPath())
-
-        session, _ := store.Get(r, "authorization")
-
-        now := time.Now()
-        var claims *JWTClaims
-
-        if session.Values["jwt"] != nil { // still don't know if this server/client side
-            token, err := jwt.ParseWithClaims(session.Values["jwt"].(string), &JWTClaims{}, func(token *jwt.Token) (interface{}, error) {
-                return []byte(jwt_key), nil
-            })
-            var ok bool
-						// okay so, token.Valid does nothing...,, yet we call it, and then do all the things it was supposed to do inside of an if block, but it was supposed to do it during "ParseWithClaims"
-            if claims, ok = token.Claims.(*JWTClaims); ok && token.Valid { 
-                if session.Values["jwt"] != nil {
-                    if claims.Exp < now.Unix() {
-                        log.Printf("Expired jwt. Forming new token.")
-                        session.Values["jwt"] = nil
-                    } else {
-                        claims.Exp = now.Add(time.Hour * 24 * 7).Unix() // wow that's a lot
-                        if _, err := UpdateJWT(*claims, w, r); log.Check(err) { 
-                            http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-                            return
-                        }
-                    }
-                }
-            } else {
-                log.Check(err)
-                log.Errorf("Malformed JWT.")
-                http.Error(w, "Unauthorized", http.StatusUnauthorized)
-                return
-            }
-        }
-
-        if session.Values["jwt"] == nil {
-            claims = &JWTClaims{UID: "", Exp: now.Add(time.Hour * 24 * 7).Unix()}
-            tokenString, err := UpdateJWT(*claims, w, r)
-            if log.Check(err) { // oh now I get it and I kinda like it
-                http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-                return
-            }
-            log.Printf("New token: %s", tokenString)
-        }
-
         log.Printf("Claims: %v", *claims)
-        context.Set(r, "claims", *claims)
-        next(w, r)
     })
 }
+
+// TODO: writeFail
+// if it's a bad token, you should respond with the proper header()... they may not care, so don't 401 everybody, but still. do they need to be authorized? can we treat it like first time? total rejection? let them know its a bad cookie tho
+//	send WWW-Authenticate/401 and w/e info you want for the user
+// const (
+//    ValidationErrorMalformed        uint32 = 1 << iota // Token is malformed
+//    ValidationErrorUnverifiable                        // Token could not be verified because of signing problems
+//    ValidationErrorSignatureInvalid                    // Signature validation failed
+
+    // Standard Claim validation errors
+//    ValidationErrorAudience      // AUD validation failed
+//    ValidationErrorExpired       // EXP validation failed
+//    ValidationErrorIssuedAt      // IAT validation failed
+//    ValidationErrorIssuer        // ISS validation failed
+//    ValidationErrorNotValidYet   // NBF validation failed
+//    ValidationErrorId            // JTI validation failed
+//    ValidationErrorClaimsInvalid // Generic claims validation error
