@@ -9,6 +9,6 @@ all:
 # But I don't want it to build everytime, only if it's changed
 # No local changes anyway....
 dependencies:
-		go get -u github.com/gorilla/context
 		go get -u gopkg.in/dgrijalva/jwt-go.v3
 		go get -u github.com/nu7hatch/gouuid
+		go get -u github.com/ayjayt/justTheClaims

@@ -1,4 +1,4 @@
-package server
+package main
 
 import (
     "html/template"
@@ -46,4 +46,4 @@ func ImageNav(user_id string, topsite string) Menu {
         navbar.RightItems = append(navbar.RightItems, MenuItem{Link:template.URL(topsite+"/account"), Text:"Account"})
     }
     return navbar
-}
+}*/

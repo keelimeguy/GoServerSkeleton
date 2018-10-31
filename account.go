@@ -1,5 +1,11 @@
-package server
+package main
 
+func nothingAccount() {
+	return
+}
+
+
+/*
 import (
     "net/http"
 
@@ -34,4 +40,4 @@ func AccountHandler(w http.ResponseWriter, r *http.Request) {
         return
     }
 
-}
+}*/

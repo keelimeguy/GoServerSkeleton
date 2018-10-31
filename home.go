@@ -1,4 +1,4 @@
-package server
+package main
 
 import (
     "encoding/json"
@@ -63,4 +63,4 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
         http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
         return
     }
-}
+}*/

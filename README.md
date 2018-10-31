@@ -21,18 +21,20 @@ To pull any new tags to local, use:
 
 # Todo:
 
-I basically ignored logging cause it's small and contained. Things aren't really built on it.
---- fix skeleton:  
 
-- finish fleshing out tokens
-		-- get it implemented (30 minutes)
+- go through and fix (pointers and stuff)
+- understand claims better
 - Get TLS in there  (30 minutes)
 - rename packages (45 minutes)
-- test it with curl and not https (30 min)
-- did i miss something from keelins repo (30 min)
+- test with curl
+- did i miss something from keelins repo... (30 min)
 - look @ templates, whatever (45 minutes)
 - document (30 min)
 - pull request (20 minutes) // aj is done
+
+### Stuff AJ Put Away 
+
 - is error processing really sufficient? (we're done, keelin can take a look at this if he cares, integrate it with logging better)
 - prevent collisions (key names, JWT, cookies, etc)
 - whats the deal with the ClaimMaps and it's relationship with json
+- Goal is handler fucntions that can use existing or create configuration structures declared anywhere. multiple. in a modular way. I think honestly, handler functions should never be anywhere but `package main`. Otherwise, you're injecting dependencies, reversing the service. There's a whole fucking thing about this.
