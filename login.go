@@ -1,37 +1,29 @@
+// This is a package
 package main
 
 import (
-//    "encoding/json"
-    "net/http"
+		"net/http"
 		"fmt"
-
-//    "github.com/nu7hatch/gouuid"
-
-    log "project/logging"
+		"github.com/nu7hatch/gouuid"
+		"encoding/json"
+		justClaims "github.com/autopogo/justClaims"
+		log "github.com/autopogo/justLogging"
 )
-// pass a copy of AuthContext os you can't mess it up
-// this probably woulda been better with an structure taking a pointer to AuthContext
-// at runtime and this as HTTPServe
-func LoginHandler(aC AuthContext) (h http.HandlerFunc) {
+
+func NewLoginHandleFunc(jCC *justClaims.Config) (h http.HandlerFunc) {
 	h = func(w http.ResponseWriter, r *http.Request) {
-		var claims map[string]interface{}
 		if r.Method == http.MethodPost {
+			var claims map[string]interface{}
 			var err error
-			if claims, err = aC.ReadJWT(w,r); err != nil {
+			if claims, err = jCC.GetClaims(w,r); err != nil {
 				log.Errorf("ReadJWT failed in login with: %v", err)
 			} else {
 				fmt.Println(claims);
-				aC.SetClaims(w, r, claims)
+				jCC.SetClaims(w, r, claims)
 				w.WriteHeader(http.StatusOK)
 			}
 
-			/*if !ok {
-					log.Errorf("Could not read claims.")
-					http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-					return
-			}
-
-			if claims.UID != "" {
+			if claims["uid"] != "" { // sure...
 					log.Errorf("Bad request.")
 					http.Error(w, "Bad Request", http.StatusBadRequest)
 					return
@@ -49,7 +41,9 @@ func LoginHandler(aC AuthContext) (h http.HandlerFunc) {
 					return
 			}
 
-			if data["password"].(string) != entry_KEY {
+			//if data["password"].(string) != entry_KEY {
+			// THERE IS NO REAL PASSWORD EH?
+			if false {
 					log.Warningf("Unauthorized.")
 					http.Error(w, "Unauthorized", http.StatusUnauthorized)
 					return
@@ -59,13 +53,17 @@ func LoginHandler(aC AuthContext) (h http.HandlerFunc) {
 					http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 					return
 			} else {
-					claims.UID = uuid.String()
+					claims["uid"] = uuid.String()
 			}
 
-			if _, err := UpdateJWT(claims, w, r); log.Check(err) {
+/*			if _, err := jCC.SetClaims(w, r, claims); log.Check(err) {
 					http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 					return
-			}*/
+			}
+			*/
+			// It should return an error, but it doesn't
+			jCC.SetClaims(w, r, claims);
+
 		} else {
 				log.Warningf("Method not allowed.")
 				http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
@@ -74,17 +72,12 @@ func LoginHandler(aC AuthContext) (h http.HandlerFunc) {
 	}
 	return h
 }
-/*
-func JoinHandler(w http.ResponseWriter, r *http.Request) {
-    if r.Method == http.MethodPost {
-        var claims, ok = context.Get(r, "claims").(JWTClaims)
-        if !ok {
-            log.Errorf("Could not read claims.")
-            http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-            return
-        }
 
-        if claims.UID != "" {
+func NewJoinHandleFunc(jCC *justClaims.Config) (h http.HandlerFunc) {
+	h = func(w http.ResponseWriter, r *http.Request) {
+    if r.Method == http.MethodPost {
+			claims, _ := jCC.GetClaims(w, r)
+        if claims["uid"] != "" {
             log.Errorf("Bad request.")
             http.Error(w, "Bad Request", http.StatusBadRequest)
             return
@@ -95,7 +88,6 @@ func JoinHandler(w http.ResponseWriter, r *http.Request) {
             http.Error(w, "Internal Server Error", http.StatusInternalServerError)
             return
         }
-				// okayyyyyyy just fuciing DIE
         http.Error(w, "Service Unavailable", http.StatusServiceUnavailable)
         return
     } else {
@@ -103,5 +95,7 @@ func JoinHandler(w http.ResponseWriter, r *http.Request) {
         http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
         return
     }
+	}
+	return
 }
-*/
+
