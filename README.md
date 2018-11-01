@@ -21,9 +21,9 @@ Look through the files. Version control in the skeleton sucks, but that's a comp
 # Todo:
 
 ### Stuff AJ Put Away (this is honestly for the skeleton and justClaims etc, the whole thing)
-  * Understand claims better <-- can we get off map, whats its relationship with json
+  * Update w/ claims, API has broke on next pull
 	* maybe document for godocs
-  * is error processing really sufficient? - we need an error implemetnation right?
+  * is error processing really sufficient? - we need an error implementation right?
   * prevent collisions (key names, JWT, cookies, etc)
 	* better abstraction of templates
 	* I didn't port /home
