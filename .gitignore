@@ -33,3 +33,4 @@ tests/
 logs/
 src/*
 !src/project/
+*.swp

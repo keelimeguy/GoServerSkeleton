@@ -1,14 +1,13 @@
-package server
+package main
 
 import (
-    "encoding/json"
-    "net/http"
+//    "encoding/json"
+//    "net/http"
 
-    "github.com/gorilla/context"
-
-    log "project/logging"
+//    log "github.com/autopogo/justLogging"
 )
-
+// just don't care about go generated HTML yet.
+/*
 func HomeHandler(w http.ResponseWriter, r *http.Request) {
     // Handle unknown path with 404
     if r.URL.Path != "/" {
@@ -63,4 +62,4 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
         http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
         return
     }
-}
+}*/

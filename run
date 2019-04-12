@@ -1,2 +1,0 @@
-#!/bin/bash
-./myserver 8080 "templates/*" logs/
